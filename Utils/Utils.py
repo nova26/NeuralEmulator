@@ -1,4 +1,3 @@
-
 def getFreqForSpikesVec(voutIndexToVal):
     spikeCount = 0
 

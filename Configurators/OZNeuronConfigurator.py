@@ -5,6 +5,7 @@ import numpy as np
 from scipy import signal
 import warnings
 
+
 class OZNeuronConfigurator:
     def __init__(self):
         configFileName = os.getenv('NERUSIM_CONF')
@@ -77,7 +78,7 @@ class OZNeuronConfigurator:
     def __resizeSpikeValVec(self, spikeValsFresh, spikeVals):
         up = 2
         down = 1
-        f = signal.resample_poly(spikeVals,up,down,padtype='mean')
+        f = signal.resample_poly(spikeVals, up, down, padtype='mean')
         f = f.tolist()
 
         indexes = [x for x in range(len(f))]
@@ -119,7 +120,6 @@ class OZNeuronConfigurator:
 
     def getSpikevalsList(self):
         return self.fullSpike
-
 
 
 if __name__ == "__main__":

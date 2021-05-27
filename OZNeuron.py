@@ -2,18 +2,18 @@ import sys
 import os
 import matplotlib.pyplot as plt
 
-scriptpath = r"C:\Users\Avi\Desktop\PyProj\NeuralEmulator\Test"
-sys.path.append(os.path.abspath(scriptpath))
+from NeuralEmulator.Interfaces.SimBase import SimBase
+from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
+from NeuralEmulator.Test.SimpleLeakCurrent import SimpleLeakCurrent
 
-from SimBase import SimBase
-from SimpleSynapse import SimpleSynapse
-from OZNeuronConfigurator import OZNeuronConfigurator
+from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
 
 
 class OZNeuron(SimBase):
-    def __init__(self, synapse, oZNeuronConfigurator):
+    def __init__(self, synapse, leakCurrent, oZNeuronConfigurator):
         self.oZNeuronConfigurator = oZNeuronConfigurator
         self.synapse = synapse
+        self.leakCurrent = leakCurrent
 
         spikeValsList = self.oZNeuronConfigurator.getSpikevalsList()
 
@@ -23,10 +23,10 @@ class OZNeuron(SimBase):
         self.__configWindow()
 
     def __configWindow(self):
-        self.inCurrent = self.synapse.getCurrent()
+        self.__updateCurrents()
 
         spikeValsList = self.oZNeuronConfigurator.getSpikevalsList()
-        freg = self.getFreq()
+        freg = self.__getFreq()
 
         netoSpikesTime = freg * (len(spikeValsList) * self.oZNeuronConfigurator.getSimTimeTick())
         notSpikeTime = 1.0 - netoSpikesTime
@@ -45,7 +45,7 @@ class OZNeuron(SimBase):
 
         return self.simIndex < len(self.spikeSamplesValsList) and self.simIndex != 0
 
-    def setVoutVal(self, i):
+    def __setVoutVal(self, i):
         if i < len(self.spikeSamplesValsList):
             self.vout = self.spikeSamplesValsList[i]
         else:
@@ -54,45 +54,59 @@ class OZNeuron(SimBase):
     def getVoutVal(self):
         return self.vout
 
-    def getWindowSize(self):
+    def __getWindowSize(self):
         return self.windowSize
 
-    def getIinCoef(self):
+    def __getIinCoef(self):
         return self.oZNeuronConfigurator.getCoef()
 
-    def getIin(self):
-        return self.synapse.getCurrent()
+    def __getIin(self):
+        return self.inCurrent
 
-    def getFreq(self):
+    def __getILeak(self):
+        return self.outLeak
+
+    def __updateCurrents(self):
+        self.inCurrent = self.synapse.getCurrent()
+        self.outLeak = self.leakCurrent.getCurrent()
+
+    def __getFreq(self):
         freq = 0
-        iin = self.getIin()
+        iIn = self.__getIin()
+        iLeak = self.__getILeak()
+
+        iIn = iIn - iLeak
+        if iIn < 0:
+            iIn = 0
+
         coef = self.oZNeuronConfigurator.getIInCoef()
 
         for x in range(len(coef)):
-            freq += coef[x] * iin ** x
+            freq += coef[x] * (iIn ** x)
         freq -= (freq % 5)
 
         return int(freq)
 
-    def getMaxFreq(self):
+    def __getMaxFreq(self):
         return self.maxSpike
 
     def run(self):
-        currentCurrent = self.synapse.getCurrent()
         if (not self.__isInSpike()) and self.inCurrent != self.synapse.getCurrent():
             self.__configWindow()
 
-        self.setVoutVal(self.simIndex)
+        self.__setVoutVal(self.simIndex)
         self.simIndex = self.simIndex + 1
-        if self.simIndex >= self.getWindowSize():
+        if self.simIndex >= self.__getWindowSize():
             self.simIndex = 0
 
 
 if __name__ == "__main__":
+    os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
 
     simpleSynapse = SimpleSynapse(1.0 * 10.0 ** (-6))
+    leakCurrent = SimpleLeakCurrent(0)
     oZNeuronConfigurator = OZNeuronConfigurator()
-    n = OZNeuron(simpleSynapse, oZNeuronConfigurator)
+    n = OZNeuron(simpleSynapse, leakCurrent, oZNeuronConfigurator)
     simTime = OZNeuronConfigurator().getSimTimeTick()
     numberOfTicksPerOneSec = int(1.0 // oZNeuronConfigurator.getSimTimeTick())
     vals = []

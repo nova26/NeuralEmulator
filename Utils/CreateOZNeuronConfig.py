@@ -11,15 +11,8 @@ df = pd.read_csv(FILE)
 x = df.iloc[:, 0].tolist()
 y = df.iloc[:, 1].tolist()
 
-mymodel = numpy.poly1d(numpy.polyfit(x, y, 7))
-
-print(r2_score(y, mymodel(x)))
-
-coef = mymodel.coef
-coef = coef.tolist()
-
 data = {}
-data["iincoef"] = coef
+
 data["spikeWidth"] = 3.0 * 10.0 ** (-3)
 data["simTime"] = 0.004880913807011 * 10.0 ** (-2)
 

@@ -1,11 +1,6 @@
-import os
-import sys
-from SimBase import SimBase
+from NeuralEmulator.Interfaces.SimBase import SimBase
 
-scriptpath = r"C:\Users\Avi\Desktop\PyProj\NeuralEmulator\Test"
-sys.path.append(os.path.abspath(scriptpath))
-
-from SimpleVoltgaeSource import SimpleVoltgaeSource
+from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 
 
 class PreprocessingBlock(SimBase):
@@ -19,7 +14,6 @@ class PreprocessingBlock(SimBase):
 
     def getVoutNEG(self):
         return self.VNEG
-
 
     def run(self):
         vin = self.voltgaeSource.getVoltage()
@@ -36,14 +30,14 @@ class PreprocessingBlock(SimBase):
 
 
 if __name__ == "__main__":
-    vin = SimpleVoltgaeSource()
+    vin = SimpleVoltageSource()
     p = PreprocessingBlock(vin)
     print("VIN -1")
     vin.setVoltage(-1.0)
     p.run()
-    print("VPOS {} VNEG {}".format(p.getVoutPOS(),p.getVoutNEG()))
+    print("VPOS {} VNEG {}".format(p.getVoutPOS(), p.getVoutNEG()))
 
     print("VIN -1")
     vin.setVoltage(1.0)
     p.run()
-    print("VPOS {} VNEG {}".format(p.getVoutPOS(),p.getVoutNEG()))
+    print("VPOS {} VNEG {}".format(p.getVoutPOS(), p.getVoutNEG()))

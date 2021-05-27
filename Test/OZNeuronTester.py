@@ -6,13 +6,11 @@ import pandas as pd
 os.environ["SIM_ROOT"] = r"C:\Users\Avi\Desktop\PyProj\NeuralEmulator"
 os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
 
-sys.path.append(os.path.abspath(os.environ["SIM_ROOT"] + "\\config"))
-sys.path.append(os.path.abspath(os.environ["SIM_ROOT"] + "\\Utils"))
 
-from SimpleSynapse import SimpleSynapse
-from OZNeuronConfigurator import OZNeuronConfigurator
-from OZNeuron import OZNeuron
-from Utils import getFreqForSpikesVec
+from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
+from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
+from NeuralEmulator.OZNeuron import OZNeuron
+from NeuralEmulator.Utils.Utils import getFreqForSpikesVec
 
 ozConfigurator = OZNeuronConfigurator()
 
