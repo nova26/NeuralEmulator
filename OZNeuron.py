@@ -1,43 +1,53 @@
-import sys
+import numpy as np
 import os
 import matplotlib.pyplot as plt
-
+import math
 from NeuralEmulator.Interfaces.SimBase import SimBase
 from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
 from NeuralEmulator.Test.SimpleLeakCurrent import SimpleLeakCurrent
-
 from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
+from NeuralEmulator.Utils.Utils import getValueFromPoly
 
 
 class OZNeuron(SimBase):
-    def __init__(self, synapse, leakCurrent, oZNeuronConfigurator):
-        self.oZNeuronConfigurator = oZNeuronConfigurator
+    def __init__(self, synapse, leakCurrent, ozNeuronConfigurator):
         self.synapse = synapse
         self.leakCurrent = leakCurrent
 
-        spikeValsList = self.oZNeuronConfigurator.getSpikevalsList()
+        self.spikeValsList = ozNeuronConfigurator.getSpikevalsList()
 
-        timeTime = len(spikeValsList) * self.oZNeuronConfigurator.getSimTimeTick()
+        self.simTimeTick = ozNeuronConfigurator.getSimTimeTick()
+
+        timeTime = len(self.spikeValsList) * ozNeuronConfigurator.getSimTimeTick()
         self.maxSpike = 1.0 / timeTime
+
+        self.coef = np.array(ozNeuronConfigurator.getIInCoef())
+        self.inCurrent = 0
+        self.simIndex = 0
+        self.outLeak = 0
+        self.vout = 0
 
         self.__configWindow()
 
     def __configWindow(self):
-        self.__updateCurrents()
 
-        spikeValsList = self.oZNeuronConfigurator.getSpikevalsList()
-        freg = self.__getFreq()
+        freq = self.__getFreq()
 
-        netoSpikesTime = freg * (len(spikeValsList) * self.oZNeuronConfigurator.getSimTimeTick())
+        netoSpikesTime = freq * (len(self.spikeValsList) * self.simTimeTick)
         notSpikeTime = 1.0 - netoSpikesTime
-        notSpikePerSpikeTime = notSpikeTime / freg
 
-        notSpikeSamples = notSpikePerSpikeTime // self.oZNeuronConfigurator.getSimTimeTick()
+        notSpikePerSpikeTime = notSpikeTime / freq if freq != 0 else 1.0
 
-        self.spikeSamplesValsList = spikeValsList
+        notSpikeSamples = notSpikePerSpikeTime // self.simTimeTick
+
+        self.spikeSamplesValsList = self.spikeValsList
+
+        if freq == 0:
+            self.spikeSamplesValsList = [0 for x in self.spikeSamplesValsList]
+
         self.notSpikeSamplesCount = notSpikeSamples
 
-        self.windowSize = len(spikeValsList) + notSpikeSamples
+        self.windowSize = len(self.spikeValsList) + notSpikeSamples
         self.simIndex = 0
         self.vout = 0
 
@@ -58,7 +68,7 @@ class OZNeuron(SimBase):
         return self.windowSize
 
     def __getIinCoef(self):
-        return self.oZNeuronConfigurator.getCoef()
+        return self.coef
 
     def __getIin(self):
         return self.inCurrent
@@ -71,27 +81,27 @@ class OZNeuron(SimBase):
         self.outLeak = self.leakCurrent.getCurrent()
 
     def __getFreq(self):
-        freq = 0
-        iIn = self.__getIin()
-        iLeak = self.__getILeak()
 
-        iIn = iIn - iLeak
+        Isyn = self.__getIin()
+        Ileak = self.__getILeak()
+        iIn = Isyn - Ileak
+
         if iIn < 0:
             iIn = 0
 
-        coef = self.oZNeuronConfigurator.getIInCoef()
+        self.freq = int(getValueFromPoly(self.coef, self.coef.shape[0], iIn))
 
-        for x in range(len(coef)):
-            freq += coef[x] * (iIn ** x)
-        freq -= (freq % 5)
-
-        return int(freq)
+        return self.freq
 
     def __getMaxFreq(self):
         return self.maxSpike
 
+    def getFreq(self):
+        return self.freq
+
     def run(self):
         if (not self.__isInSpike()) and self.inCurrent != self.synapse.getCurrent():
+            self.__updateCurrents()
             self.__configWindow()
 
         self.__setVoutVal(self.simIndex)
@@ -107,7 +117,7 @@ if __name__ == "__main__":
     leakCurrent = SimpleLeakCurrent(0)
     oZNeuronConfigurator = OZNeuronConfigurator()
     n = OZNeuron(simpleSynapse, leakCurrent, oZNeuronConfigurator)
-    simTime = OZNeuronConfigurator().getSimTimeTick()
+    simTime = oZNeuronConfigurator.getSimTimeTick()
     numberOfTicksPerOneSec = int(1.0 // oZNeuronConfigurator.getSimTimeTick())
     vals = []
     indexs = [0]

@@ -1,7 +1,7 @@
-from NeuralEmulator.Interfaces.VoltageSourceBase import VoltgaeSourceBase
+from NeuralEmulator.Interfaces.VoltageSourceBase import VoltageSourceBase
 
 
-class NegPreprocessingBlock(VoltgaeSourceBase):
+class NegPreprocessingBlock(VoltageSourceBase):
     def __init__(self, preprocessingBlock):
         self.preprocessingBlock = preprocessingBlock
 

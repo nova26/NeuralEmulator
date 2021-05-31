@@ -14,6 +14,7 @@ class PulseSynapse(SynapseBase):
         self.current = 0
 
     def __updateCurrent(self):
+        self.cacheVinVal = self.vin.getVoltage()
         i = 0
         vin = self.vin.getVoltage()
         coef = self.configurator.getCoef()

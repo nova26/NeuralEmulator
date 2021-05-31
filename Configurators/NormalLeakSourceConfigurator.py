@@ -2,7 +2,7 @@ import os
 import json
 
 
-class NoramalLeakSourceConfigurator:
+class NormalLeakSourceConfigurator:
     def __init__(self):
         configFileName = os.getenv('NERUSIM_CONF')
         if configFileName is None:
@@ -27,4 +27,4 @@ class NoramalLeakSourceConfigurator:
 
 if __name__ == "__main__":
     os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
-    noramalLeakSourceConfigurator = NoramalLeakSourceConfigurator()
+    noramalLeakSourceConfigurator = NormalLeakSourceConfigurator()

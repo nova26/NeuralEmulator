@@ -2,10 +2,12 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
 
 os.environ["SIM_ROOT"] = r"C:\Users\Avi\Desktop\PyProj\NeuralEmulator"
 os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
 
+from NeuralEmulator.Test.SimpleLeakCurrent import SimpleLeakCurrent
 
 from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
 from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
@@ -25,8 +27,10 @@ simTickTime = OZNeuronConfigurator().getSimTimeTick()
 
 simOZfreqs = []
 
-simpleSynapse = SimpleSynapse()
-oz = OZNeuron(simpleSynapse, ozConfigurator)
+simpleSynapse = SimpleSynapse(1.0 * 10.0 ** (-6))
+
+leakCurrent = SimpleLeakCurrent(0)
+oz = OZNeuron(simpleSynapse,leakCurrent, ozConfigurator)
 
 for i in iIn:
     simpleSynapse.setCurrent(i)

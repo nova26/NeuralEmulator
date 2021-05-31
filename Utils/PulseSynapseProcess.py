@@ -2,10 +2,8 @@ import pandas as pd
 import csv
 import sys, traceback
 
-FILE_PATH = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\circuits\pulseSynapse\PulseSynapse.csv"
-FILE_PATH = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\circuits\Ilk\OZ_8_pos_curves.csv"
-
-
+FILE_PATH = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\circuits\pulseSynapse\PulseSynapse.txt"
+FILE_PATH = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\circuits\Ilk\OZ_8_pos_curves.txt"
 def toFloat(val):
     if 'm' in val:
         val = val.replace("m", "")
@@ -28,19 +26,23 @@ def toFloat(val):
 
 
 with open(FILE_PATH, 'r') as in_file:
-    in_file.readline()
+    fl = in_file.readline()
     vin = {}
     preVin = None
     for line in in_file:
-        line = line.split(",")
-        if len(line) == 1:
-            line = line[0].split()
+        line = line.split()
+
         if "Step" in line:
             preVin = toFloat(line[2].split("=")[1])
         else:
-            vin[preVin] = toFloat(line[1])
+            try:
+                vin[preVin] = toFloat(line[1])
+            except:
+                print(line)
+                vin[preVin] = toFloat(line[1])
 
-    cvsFileName = FILE_PATH.replace(".csv", "_config.csv")
+
+    cvsFileName = FILE_PATH.replace(".txt", "_txt.csv")
     with open(cvsFileName, mode='w', newline='') as out_file:
         writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(["vin", 'iout'])

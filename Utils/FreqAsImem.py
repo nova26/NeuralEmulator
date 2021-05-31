@@ -100,7 +100,6 @@ def createCSV():
                     try:
                         iin = k
                         freq = iinToFreq[iin]
-
                         writer.writerow([iin, freq])
 
                     except:

@@ -2,8 +2,8 @@ from NeuralEmulator.Interfaces.VoltageSourceBase import VoltageSourceBase
 
 
 class SimpleVoltageSource(VoltageSourceBase):
-    def __init__(self):
-        self.v = 0
+    def __init__(self, v=0):
+        self.v = v
 
     def getVoltage(self):
         return self.v
