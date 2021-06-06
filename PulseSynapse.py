@@ -3,6 +3,8 @@ from NeuralEmulator.Configurators.PulseSynapseConfigurator import PulseSynapseCo
 from NeuralEmulator.Preprocessing.PreprocessingBlock import PreprocessingBlock
 from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 from NeuralEmulator.Preprocessing.PosPreprocessingBlock import PosPreprocessingBlock
+from NeuralEmulator.Utils.Utils import getValueFromPoly
+import numpy as np
 
 
 class PulseSynapse(SynapseBase):
@@ -12,27 +14,25 @@ class PulseSynapse(SynapseBase):
 
         self.cacheVinVal = self.vin.getVoltage()
         self.current = 0
+        self.coef = np.array(self.configurator.getCoef())
+        self.__updateCurrent()
 
     def __updateCurrent(self):
         self.cacheVinVal = self.vin.getVoltage()
-        i = 0
-        vin = self.vin.getVoltage()
-        coef = self.configurator.getCoef()
-
-        for x in range(len(coef)):
-            i += coef[x] * (vin ** x)
-        self.current = i
+        self.current = self.configurator.getCurrentForVoltage(self.cacheVinVal)
 
     def getCurrent(self):
         return self.current
 
     def run(self):
-        if self.cacheVinVal != self.vin.getVoltage():
+        vin = self.vin.getVoltage()
+        if self.cacheVinVal != vin:
             self.__updateCurrent()
 
 
 if __name__ == "__main__":
     import os
+
     os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
 
     vin = SimpleVoltageSource()

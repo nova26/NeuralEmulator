@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-import math
 from NeuralEmulator.Interfaces.SimBase import SimBase
 from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
 from NeuralEmulator.Test.SimpleLeakCurrent import SimpleLeakCurrent
@@ -13,7 +12,7 @@ class OZNeuron(SimBase):
     def __init__(self, synapse, leakCurrent, ozNeuronConfigurator):
         self.synapse = synapse
         self.leakCurrent = leakCurrent
-
+        self.configurator = ozNeuronConfigurator
         self.spikeValsList = ozNeuronConfigurator.getSpikevalsList()
 
         self.simTimeTick = ozNeuronConfigurator.getSimTimeTick()
@@ -52,7 +51,6 @@ class OZNeuron(SimBase):
         self.vout = 0
 
     def __isInSpike(self):
-
         return self.simIndex < len(self.spikeSamplesValsList) and self.simIndex != 0
 
     def __setVoutVal(self, i):
@@ -90,6 +88,7 @@ class OZNeuron(SimBase):
             iIn = 0
 
         self.freq = int(getValueFromPoly(self.coef, self.coef.shape[0], iIn))
+        self.freq = self.configurator.getFreqForCurrent(iIn)
 
         return self.freq
 
@@ -100,7 +99,9 @@ class OZNeuron(SimBase):
         return self.freq
 
     def run(self):
-        if (not self.__isInSpike()) and self.inCurrent != self.synapse.getCurrent():
+        inc = self.synapse.getCurrent()
+        ouc = self.leakCurrent.getCurrent()
+        if (not self.__isInSpike()) and (self.inCurrent != inc or self.outLeak !=ouc):
             self.__updateCurrents()
             self.__configWindow()
 

@@ -27,10 +27,9 @@ simTickTime = OZNeuronConfigurator().getSimTimeTick()
 
 simOZfreqs = []
 
-simpleSynapse = SimpleSynapse(1.0 * 10.0 ** (-6))
-
+simpleSynapse = SimpleSynapse()
 leakCurrent = SimpleLeakCurrent(0)
-oz = OZNeuron(simpleSynapse,leakCurrent, ozConfigurator)
+oz = OZNeuron(simpleSynapse, leakCurrent, ozConfigurator)
 
 for i in iIn:
     simpleSynapse.setCurrent(i)
@@ -46,4 +45,4 @@ for i in iIn:
 
 df["simOz"] = simOZfreqs
 f = csvFile.replace(".csv", "2.csv")
-df.to_csv(f)
+df.to_csv(f, index=False)

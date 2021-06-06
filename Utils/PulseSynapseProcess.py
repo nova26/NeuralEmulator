@@ -50,4 +50,4 @@ with open(FILE_PATH, 'r') as in_file:
         for k in vin.keys():
             writer.writerow([k, vin[k]])
 
-    print("asd")
+

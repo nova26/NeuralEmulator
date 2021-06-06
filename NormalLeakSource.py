@@ -12,18 +12,20 @@ class NormalLeakSource(LeakCurrentBase):
         self.cacheVoltage = vin.getVoltage()
         self.current = 0
         self.coef = np.array(configurator.getCoef())
+        self.configurator = configurator
         self.__calcCurrent()
+
 
     def getCurrent(self):
         return self.current
 
     def __calcCurrent(self):
-        c = getValueFromPoly(self.coef,self.coef.shape[0], self.cacheVoltage)
-        self.current = c
+        self.current = self.configurator.getCurrentForVoltage(self.cacheVoltage)
 
     def run(self):
-        if self.cacheVoltage != self.vin.getVoltage():
-            self.cacheVoltage = self.vin.getVoltage()
+        v = self.vin.getVoltage()
+        if self.cacheVoltage != v:
+            self.cacheVoltage = v
             self.__calcCurrent()
 
 

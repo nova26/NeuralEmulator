@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
 import warnings
+import pandas as pd
+import numpy as np
 
 
 class OZNeuronConfigurator:
@@ -43,9 +45,16 @@ class OZNeuronConfigurator:
 
         self.fullSpike = fullspike
 
-        if simulationSpikeSamples > len(fullspike):
-            diff = simulationSpikeSamples - len(fullspike)
-            warnings.warn("Simulation spike samples requirement is not as created spike")
+        csvFile = data["currentModelPath"]
+
+        df = pd.read_csv(csvFile)
+        self.df_iIn = df["Iin"].to_numpy(dtype=float)
+        self.df_freq = df["Freq"].to_numpy(dtype=float)
+        t = self.getFreqForCurrent(1.48 * (10 ** -8))
+
+        # if simulationSpikeSamples > len(fullspike):
+        #     diff = simulationSpikeSamples - len(fullspike)
+        #     warnings.warn("Simulation spike samples requirement is not as created spike")
             # frise = self.__getSimulationSizeSpikeValsVec(diff, spikeRiseVals, spikeFallVals)
             # indexes = [x for x in range(len(frise))]
             # plt.xticks(np.arange(min(indexes), max(indexes) + 1, 1.0))
@@ -60,6 +69,11 @@ class OZNeuronConfigurator:
         #
         # plt.plot(indexes, fullspike)
         # plt.show()
+
+    def getFreqForCurrent(self, current):
+        t = np.searchsorted(self.df_iIn, current, side='right')
+        val = self.df_iIn[t - 1]
+        return self.df_freq[t - 1]
 
     def __getSimulationSizeSpikeValsVec(self, diff, spikeRiseVals, spikeFallVals):
         riseTimeDelta = fallTimeDelta = diff // 2
@@ -123,4 +137,6 @@ class OZNeuronConfigurator:
 
 
 if __name__ == "__main__":
+    os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
+
     oZNeuronConfigurator = OZNeuronConfigurator()

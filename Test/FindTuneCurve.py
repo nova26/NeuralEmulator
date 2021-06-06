@@ -55,22 +55,30 @@ if __name__ == "__main__":
     positivePulseSynapse = PulseSynapse(vposPort, pulseSynapseConfigurator)
     negativePulseSynapse = PulseSynapse(vnegPort, pulseSynapseConfigurator)
 
-    NEURON_NUM = 1024
+    # Leak
+    normalLeakSource = NormalLeakSource(SimpleVoltageSource(745.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource2 = NormalLeakSource(SimpleVoltageSource(735.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource3 = NormalLeakSource(SimpleVoltageSource(725.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource4 = NormalLeakSource(SimpleVoltageSource(715.0 * (10 ** -3)), noramalLeakSourceConfigurator)
 
-    negNeurons = NeuronsGenerator(NEURON_NUM // 2, negativePulseSynapse, randomVals=False)
-    posNeurons = NeuronsGenerator(NEURON_NUM // 2, positivePulseSynapse, randomVals=False)
+    # Neuron
+    ozNeuron = OZNeuron(positivePulseSynapse, normalLeakSource, ozNeuronConfigurator)
+    ozNeuron2 = OZNeuron(positivePulseSynapse, normalLeakSource2, ozNeuronConfigurator)
+    ozNeuron3 = OZNeuron(positivePulseSynapse, normalLeakSource3, ozNeuronConfigurator)
+    ozNeuron4 = OZNeuron(positivePulseSynapse, normalLeakSource4, ozNeuronConfigurator)
+
 
     # Layers
     L1 = [vin, preProcessBlock]
     L2 = [negativePulseSynapse, positivePulseSynapse]
-    L3 = negNeurons.getNeurons() + posNeurons.getNeurons()
+    L3 = [ozNeuron, ozNeuron2, ozNeuron3,ozNeuron4]
 
     layers = [L1, L2, L3]
 
     neuronsVout = {}
     neuronsFreqs = {"VIN": []}
     keyToObj = {}
-    for x in range(NEURON_NUM):
+    for x in range(len(L3)):
         k = "n{}".format(x)
         neuronsVout[k] = []
         neuronsFreqs[k] = []
@@ -125,7 +133,7 @@ if __name__ == "__main__":
     df.to_csv(OUTOUT_FILE, header=True, index=False)
     plt.plot()
 
-df = pd.read_csv(r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\tuneCurves\curves.csv")
+df = pd.read_csv(OUTOUT_FILE)
 x = df["VIN"]
 for col in df.columns:
     if col != "VIN":

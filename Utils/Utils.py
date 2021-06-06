@@ -31,6 +31,26 @@ def getValueFromPoly(coef, len, x):
 
     return value
 
+def SpiceToFloat(val):
+    if 'm' in val:
+        val = val.replace("m", "")
+        retVal = float(val)
+        retVal = retVal * float(10 ** (-3))
+        return retVal
+    if 'µ' in val:
+        val = val.replace("µ", "")
+        retVal = float(val)
+        retVal = retVal * float(10 ** (-6))
+        return retVal
+    if 'n' in val:
+        val = val.replace("n", "")
+        retVal = float(val)
+        retVal = retVal * float(10 ** (-9))
+        return retVal
+
+    retVal = float(val)
+    return retVal
+
 
 if __name__ == "__main__":
     coef = [x + 1 for x in range(2000)]

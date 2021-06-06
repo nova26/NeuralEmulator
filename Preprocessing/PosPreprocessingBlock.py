@@ -6,6 +6,8 @@ class PosPreprocessingBlock(VoltageSourceBase):
         self.preprocessingBlock = preprocessingBlock
 
     def getVoltage(self):
-        return self.preprocessingBlock.getVoutPOS()
+        v = self.preprocessingBlock.getVoutPOS()
+        return v
+
     def run(self):
         pass
