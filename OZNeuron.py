@@ -20,7 +20,6 @@ class OZNeuron(SimBase):
         timeTime = len(self.spikeValsList) * ozNeuronConfigurator.getSimTimeTick()
         self.maxSpike = 1.0 / timeTime
 
-        self.coef = np.array(ozNeuronConfigurator.getIInCoef())
         self.inCurrent = 0
         self.simIndex = 0
         self.outLeak = 0
@@ -87,7 +86,6 @@ class OZNeuron(SimBase):
         if iIn < 0:
             iIn = 0
 
-        self.freq = int(getValueFromPoly(self.coef, self.coef.shape[0], iIn))
         self.freq = self.configurator.getFreqForCurrent(iIn)
 
         return self.freq

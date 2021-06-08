@@ -14,7 +14,7 @@ import random
 
 
 class NeuronsGenerator:
-    def __init__(self, neuronsNumber, synapse, lowerBound=500.0 * (10 ** -3), upperBound=790.0 * (10 ** -3), randomVals=False):
+    def __init__(self, neuronsNumber, synapse, lowerBound=100.0 * (10 ** -3), upperBound=800.0 * (10 ** -3), randomVals=False):
 
         noramalLeakSourceConfigurator = NormalLeakSourceConfigurator()
         ozNeuronConfigurator = OZNeuronConfigurator()

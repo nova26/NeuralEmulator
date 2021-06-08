@@ -55,7 +55,7 @@ if __name__ == "__main__":
     positivePulseSynapse = PulseSynapse(vposPort, pulseSynapseConfigurator)
     negativePulseSynapse = PulseSynapse(vnegPort, pulseSynapseConfigurator)
 
-    NEURON_NUM = 1024
+    NEURON_NUM = 8
 
     negNeurons = NeuronsGenerator(NEURON_NUM // 2, negativePulseSynapse, randomVals=False)
     posNeurons = NeuronsGenerator(NEURON_NUM // 2, positivePulseSynapse, randomVals=False)

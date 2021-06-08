@@ -21,7 +21,7 @@ from NeuralEmulator.PulseSynapse import PulseSynapse
 from NeuralEmulator.TemporalIntegration import TemporalIntegration
 from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 from NeuralEmulator.Utils.NeuronsGenerator import NeuronsGenerator
-from NeuralEmulator.VoltageSources.SinSignal import SinSignal
+from NeuralEmulator.VoltageSources.SinSignal import SinSignal,SquaredSin
 
 OUTOUT_FILE = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\Learning\lr.csv"
 
@@ -36,6 +36,8 @@ temporalConfigurator = TemporalConfigurator()
 
 # VIN
 vin = SinSignal(SIM_TIME, ozNeuronConfigurator.getSimTimeTick(), 2)
+vref = SquaredSin(SIM_TIME, ozNeuronConfigurator.getSimTimeTick(), 2)
+
 preProcessBlock = PreprocessingBlock(vin)
 vposPort = PosPreprocessingBlock(preProcessBlock)
 vnegPort = NegPreprocessingBlock(preProcessBlock)
@@ -45,31 +47,32 @@ positivePulseSynapse = PulseSynapse(vposPort, pulseSynapseConfigurator)
 negativePulseSynapse = PulseSynapse(vnegPort, pulseSynapseConfigurator)
 
 # Leak
-normalLeakSource = NormalLeakSource(SimpleVoltageSource(745.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-normalLeakSource2 = NormalLeakSource(SimpleVoltageSource(735.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-normalLeakSource3 = NormalLeakSource(SimpleVoltageSource(725.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-normalLeakSource4 = NormalLeakSource(SimpleVoltageSource(715.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+normalLeakSource1 = NormalLeakSource(SimpleVoltageSource(784.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+normalLeakSource2 = NormalLeakSource(SimpleVoltageSource(770.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+normalLeakSource3 = NormalLeakSource(SimpleVoltageSource(755.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+normalLeakSource4 = NormalLeakSource(SimpleVoltageSource(735.0 * (10 ** -3)), noramalLeakSourceConfigurator)
 
 # Neuron
-ozNeuron1 = OZNeuron(positivePulseSynapse, normalLeakSource, ozNeuronConfigurator)
+ozNeuron1 = OZNeuron(positivePulseSynapse, normalLeakSource1, ozNeuronConfigurator)
 ozNeuron2 = OZNeuron(positivePulseSynapse, normalLeakSource2, ozNeuronConfigurator)
 ozNeuron3 = OZNeuron(positivePulseSynapse, normalLeakSource3, ozNeuronConfigurator)
 ozNeuron4 = OZNeuron(positivePulseSynapse, normalLeakSource4, ozNeuronConfigurator)
-ozNeuron5 = OZNeuron(negativePulseSynapse, normalLeakSource, ozNeuronConfigurator)
+
+ozNeuron5 = OZNeuron(negativePulseSynapse, normalLeakSource1, ozNeuronConfigurator)
 ozNeuron6 = OZNeuron(negativePulseSynapse, normalLeakSource2, ozNeuronConfigurator)
 ozNeuron7 = OZNeuron(negativePulseSynapse, normalLeakSource3, ozNeuronConfigurator)
 ozNeuron8 = OZNeuron(negativePulseSynapse, normalLeakSource4, ozNeuronConfigurator)
 
 # Temporal Integration
 temporalConfig = 450 * (10 ** -3)
-temporalIntegration1 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron1)
-temporalIntegration2 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron2)
-temporalIntegration3 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron3)
-temporalIntegration4 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron4)
-temporalIntegration5 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron5)
-temporalIntegration6 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron6)
-temporalIntegration7 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron7)
-temporalIntegration8 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron8)
+tempIntegration1 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron1)
+tempIntegration2 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron2)
+tempIntegration3 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron3)
+tempIntegration4 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron4)
+tempIntegration5 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron5)
+tempIntegration6 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron6)
+tempIntegration7 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron7)
+tempIntegration8 = TemporalIntegration(temporalConfig, temporalConfigurator, ozNeuron8)
 
 # Adder
 adder = Adder()
@@ -78,28 +81,28 @@ adder = Adder()
 errorBlock = ErrorBlock(adder, vin, 8)
 
 # LearningBlocks
-LR = 0.01
-learningBlock1 = LearningBlock(LR, errorBlock, temporalIntegration1)
-learningBlock2 = LearningBlock(LR, errorBlock, temporalIntegration2)
-learningBlock3 = LearningBlock(LR, errorBlock, temporalIntegration3)
-learningBlock4 = LearningBlock(LR, errorBlock, temporalIntegration4)
-learningBlock5 = LearningBlock(LR, errorBlock, temporalIntegration5)
-learningBlock6 = LearningBlock(LR, errorBlock, temporalIntegration6)
-learningBlock7 = LearningBlock(LR, errorBlock, temporalIntegration7)
-learningBlock8 = LearningBlock(LR, errorBlock, temporalIntegration8)
+LR = 0.1
+learningBlock1 = LearningBlock(LR, errorBlock, tempIntegration1)
+learningBlock2 = LearningBlock(LR, errorBlock, tempIntegration2)
+learningBlock3 = LearningBlock(LR, errorBlock, tempIntegration3)
+learningBlock4 = LearningBlock(LR, errorBlock, tempIntegration4)
+learningBlock5 = LearningBlock(LR, errorBlock, tempIntegration5)
+learningBlock6 = LearningBlock(LR, errorBlock, tempIntegration6)
+learningBlock7 = LearningBlock(LR, errorBlock, tempIntegration7)
+learningBlock8 = LearningBlock(LR, errorBlock, tempIntegration8)
 
 # Layers
-L1 = [vin, preProcessBlock]
+L1 = [vin,vref, preProcessBlock]
 L2 = [negativePulseSynapse, positivePulseSynapse]
 L3 = [ozNeuron1, ozNeuron2, ozNeuron3, ozNeuron4, ozNeuron5, ozNeuron6, ozNeuron7, ozNeuron8]
-L4 = [temporalIntegration1, temporalIntegration2, temporalIntegration3, temporalIntegration4, temporalIntegration5, temporalIntegration6,
-      temporalIntegration7, temporalIntegration8]
+L4 = [tempIntegration1, tempIntegration2, tempIntegration3, tempIntegration4, tempIntegration5, tempIntegration6,tempIntegration7, tempIntegration8]
 L5 = [learningBlock1, learningBlock2, learningBlock3, learningBlock4, learningBlock5, learningBlock6, learningBlock7, learningBlock8]
 
 L6 = [adder]
 L7 = [errorBlock]
 
 adder.setListOfSources(L5)
+
 layers = [L1, L2, L3, L4, L5, L6, L7]
 
 timeAxis = []
@@ -115,6 +118,7 @@ keyToLRObj = {}
 vinVals = []
 adderVals = []
 errorVals = []
+weightVals = []
 
 for x in range(len(L3)):
     k = "n{}".format(x)
@@ -149,15 +153,19 @@ for tick in range(SIMULATION_TICKS):
     adderVals.append(adder.getVoltage())
     errorVals.append(errorBlock.getVoltage())
     vinVals.append(vin.getVoltage())
+    weightVals.append(learningBlock1.getWeight())
 
 print("\nsimulation runtime {}".format(time.time() - startTime))
-plt.plot(timeAxis, vinVals)
 plt.plot(timeAxis, adderVals)
+# plt.plot(timeAxis, vinVals)
+# plt.plot(timeAxis, weightVals)
+
+
 plt.show()
 
-oo = {"time": timeAxis, "VIN": vinVals, "VOUT": adderVals}
-
-df = pd.DataFrame(oo)
-df.to_csv(OUTOUT_FILE, header=True, index=False)
-plt.plot()
+# oo = {"time": timeAxis, "VIN": vinVals, "VOUT": adderVals}
+#
+# df = pd.DataFrame(oo)
+# df.to_csv(OUTOUT_FILE, header=True, index=False)
+# plt.plot()
 

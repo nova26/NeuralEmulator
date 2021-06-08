@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+
+from NeuralEmulator.Configurators.PulseSynapseVWConfigurator import PulseSynapseVWConfigurator
 from NeuralEmulator.Preprocessing.PreprocessingBlock import PreprocessingBlock
 from NeuralEmulator.Preprocessing.PosPreprocessingBlock import PosPreprocessingBlock
 from NeuralEmulator.Preprocessing.NegPreprocessingBlock import NegPreprocessingBlock
 from NeuralEmulator.Configurators.PulseSynapseConfigurator import PulseSynapseConfigurator
-from NeuralEmulator.PulseSynapse import PulseSynapse
+from NeuralEmulator.PulseSynapse import PulseSynapse, PulseSynapseWeighted
 from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
 from NeuralEmulator.OZNeuron import OZNeuron
 from NeuralEmulator.Test.SimpleLeakCurrent import SimpleLeakCurrent
@@ -15,6 +17,8 @@ from NeuralEmulator.Configurators.NormalLeakSourceConfigurator import NormalLeak
 from NeuralEmulator.NormalLeakSource import NormalLeakSource
 from numba import jit
 from concurrent.futures.thread import ThreadPoolExecutor
+
+from NeuralEmulator.VoltageSources.LinearSignal import StaticSource
 
 OUTOUT_FOLDER = r'C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\tuneCurves'
 OUTOUT_FILE = OUTOUT_FOLDER + "\\curves.csv"
@@ -44,6 +48,7 @@ if __name__ == "__main__":
     pulseSynapseConfigurator = PulseSynapseConfigurator()
     noramalLeakSourceConfigurator = NormalLeakSourceConfigurator()
     ozNeuronConfigurator = OZNeuronConfigurator()
+    pulseSynapseVWConfigurator = PulseSynapseVWConfigurator()
 
     # vin
     vin = SimpleVoltageSource()
@@ -52,14 +57,15 @@ if __name__ == "__main__":
     vnegPort = NegPreprocessingBlock(preProcessBlock)
 
     # Synapses
-    positivePulseSynapse = PulseSynapse(vposPort, pulseSynapseConfigurator)
-    negativePulseSynapse = PulseSynapse(vnegPort, pulseSynapseConfigurator)
+    staticSource = StaticSource(2.4)
+    positivePulseSynapse = PulseSynapseWeighted(vposPort, staticSource, pulseSynapseVWConfigurator)
+    negativePulseSynapse = PulseSynapseWeighted(vnegPort, staticSource, pulseSynapseVWConfigurator)
 
     # Leak
-    normalLeakSource = NormalLeakSource(SimpleVoltageSource(745.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-    normalLeakSource2 = NormalLeakSource(SimpleVoltageSource(735.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-    normalLeakSource3 = NormalLeakSource(SimpleVoltageSource(725.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-    normalLeakSource4 = NormalLeakSource(SimpleVoltageSource(715.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource = NormalLeakSource(SimpleVoltageSource(764.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource2 = NormalLeakSource(SimpleVoltageSource(755.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource3 = NormalLeakSource(SimpleVoltageSource(745.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource4 = NormalLeakSource(SimpleVoltageSource(735.0 * (10 ** -3)), noramalLeakSourceConfigurator)
 
     # Neuron
     ozNeuron = OZNeuron(positivePulseSynapse, normalLeakSource, ozNeuronConfigurator)
@@ -67,11 +73,11 @@ if __name__ == "__main__":
     ozNeuron3 = OZNeuron(positivePulseSynapse, normalLeakSource3, ozNeuronConfigurator)
     ozNeuron4 = OZNeuron(positivePulseSynapse, normalLeakSource4, ozNeuronConfigurator)
 
-
     # Layers
     L1 = [vin, preProcessBlock]
     L2 = [negativePulseSynapse, positivePulseSynapse]
-    L3 = [ozNeuron, ozNeuron2, ozNeuron3,ozNeuron4]
+
+    L3 = [ozNeuron, ozNeuron2, ozNeuron3, ozNeuron4]
 
     layers = [L1, L2, L3]
 
@@ -100,14 +106,13 @@ if __name__ == "__main__":
     start = time.time()
 
     while VIN != 1:
-
-        sys.stdout.write("\rSTEP {}/{}".format(currentStep, totalIncrements))
-        sys.stdout.flush()
-        currentStep += 1
         VIN += STEP_SIZE
         if VIN > VIN_MAX:
             VIN = VIN_MAX
 
+        print("STEP {}/{} VIN {}".format(currentStep, totalIncrements, VIN))
+        # sys.stdout.write("\rSTEP {}/{} VIN {}".format(currentStep, totalIncrements, VIN))
+        # sys.stdout.flush()
         neuronsFreqs["VIN"].append(VIN)
 
         vin.setVoltage(VIN)
@@ -128,6 +133,8 @@ if __name__ == "__main__":
                 neuronsFreqs[k] = s
                 neuronsVout[k] = []
 
+        currentStep += 1
+
     print("\nTime {:.3f}s".format(time.time() - start))
     df = pd.DataFrame(neuronsFreqs)
     df.to_csv(OUTOUT_FILE, header=True, index=False)
@@ -138,5 +145,9 @@ x = df["VIN"]
 for col in df.columns:
     if col != "VIN":
         plt.plot(x, df[col])
+
+plt.grid()
+plt.axhline(y=0, color='k')
+plt.axvline(x=0, color='k')
 
 plt.show()

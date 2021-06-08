@@ -7,7 +7,7 @@ class LearningBlock(VoltageSourceBase):
         self.errorSignal = errorSignal
         self.temporalSignal = temporalSignal
         self.vout = 0
-        self.weight = 0
+        self.weight = 0.0
 
     def __calcVout(self):
         deltaW = self.errorSignal.getVoltage() * self.temporalSignal.getVoltage() * self.LR
@@ -16,6 +16,8 @@ class LearningBlock(VoltageSourceBase):
 
     def getVoltage(self):
         return self.vout
-    
+    def getWeight(self):
+        return self.weight
+
     def run(self):
         self.__calcVout()

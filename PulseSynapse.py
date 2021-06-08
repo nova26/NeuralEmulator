@@ -30,6 +30,34 @@ class PulseSynapse(SynapseBase):
             self.__updateCurrent()
 
 
+class PulseSynapseWeighted(SynapseBase):
+    def __init__(self, vinSource, vwSource, configurator):
+        self.vinSource = vinSource
+        self.vwSource = vwSource
+
+        self.configurator = configurator
+
+        self.cacheVinVal = self.vinSource.getVoltage()
+        self.cacheVwVal = self.vwSource.getVoltage()
+        self.current = 0
+        self.__updateCurrent()
+
+    def __updateCurrent(self):
+        self.cacheVinVal = self.vinSource.getVoltage()
+        self.cacheVwVal = self.vwSource.getVoltage()
+
+        self.current = self.configurator.getCurrentForVoltage(self.cacheVinVal, self.cacheVwVal)
+
+    def getCurrent(self):
+        return self.current
+
+    def run(self):
+        vin = self.vinSource.getVoltage()
+        vw = self.vwSource.getVoltage()
+        if self.cacheVinVal != vin or self.cacheVwVal != vw:
+            self.__updateCurrent()
+
+
 if __name__ == "__main__":
     import os
 

@@ -26,5 +26,11 @@ class SinSignal(VoltageSourceBase):
             return self.voutMask[self.index]
 
 
+class SquaredSin(SinSignal):
+    def __init__(self, simulationTime, stepTime,frequency=1):
+        super().__init__(simulationTime, stepTime,frequency)
+        self.voutMask = self.voutMask * self.voutMask
+
+
 if __name__ == "__main__":
     sinSignal = SinSignal(1, 4.8809138070110005e-05, 2)

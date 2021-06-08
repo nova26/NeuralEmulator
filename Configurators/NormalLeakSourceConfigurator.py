@@ -25,7 +25,6 @@ class NormalLeakSourceConfigurator:
         df = pd.read_csv(csvFile)
         self.df_vin = df["vin"].to_numpy(dtype=float)
         self.df_iout = df["iout"].to_numpy(dtype=float)
-        self.getCurrentForVoltage(0.001)
 
     def getCurrentForVoltage(self, volt):
         t = np.searchsorted(self.df_vin, volt, side='right')
