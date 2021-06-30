@@ -1,7 +1,7 @@
-from NeuralEmulator.Interfaces.LeakCurrentBase import LeakCurrentBase
+from NeuralEmulator.Interfaces.CurrentSourceBase import CurrentSourceBase
 
 
-class SimpleLeakCurrent(LeakCurrentBase):
+class SimpleLeakCurrent(CurrentSourceBase):
     def __init__(self, current):
         self.current = current
 

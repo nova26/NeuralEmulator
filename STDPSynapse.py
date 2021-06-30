@@ -1,11 +1,12 @@
 from NeuralEmulator.Interfaces.VoltageSourceBase import VoltageSourceBase
 from NeuralEmulator.Configurators.STDPSynapseConfigurator import STDPSynapseConfigurator
+from NeuralEmulator.Utils.Utils import getObjID
 from NeuralEmulator.VoltageSources.LinearSignal import ListVoltageSource
 
 
 class STDPSynapse(VoltageSourceBase):
 
-    def __init__(self, postSource, preSource, configurator, defaultWeight=2.4):
+    def __init__(self, configurator, postSource=None, preSource=None, defaultWeight=2.4, printLog=False):
         self.defaultWeight = defaultWeight
         self.postSource = postSource
         self.preSource = preSource
@@ -22,12 +23,36 @@ class STDPSynapse(VoltageSourceBase):
         self.isPreSpike = False
         self.isPostSpike = False
 
+        self.learn = True
+        self.printLog = printLog
+
+    def reset(self):
+        self.stepsCounter = 0
+
+        self.postSpikeMask = [0, 0, 0]
+        self.preSpikeMask = [0, 0, 0]
+
+        self.preSpikeTime = 0
+        self.postSpikeTime = 0
+
+        self.isPreSpike = False
+        self.isPostSpike = False
+
+    def setPostSource(self, postSource):
+        self.postSource = postSource
+
+    def setPreSource(self, preSource):
+        self.preSource = preSource
+
     def getVoltage(self):
         return self.weight
 
     def __isSpike(self, arr):
 
         if arr[1] > 0.8 and (arr[0] < arr[1] and arr[1] > arr[2]):
+            if self.printLog is True:
+                print("STDP {} SPIKE".format(getObjID(self)))
+
             return True
         else:
             return False
@@ -70,11 +95,15 @@ class STDPSynapse(VoltageSourceBase):
         self.preSpikeMask.append(preVolt)
         self.preSpikeMask.pop(0)
 
+    def setLearningVal(self, val):
+        self.learn = val
+
     def run(self):
         preVolt = self.preSource.getVoltage()
         postVolt = self.postSource.getVoltage()
         self.__appendVoltages(preVolt, postVolt)
-        self.updateDeltaWeight()
+        if self.learn is True:
+            self.updateDeltaWeight()
         self.stepsCounter += 1
 
 
@@ -98,7 +127,7 @@ if __name__ == "__main__":
     n1Post = ListVoltageSource(posty)
     n2Pre = ListVoltageSource(prey)
 
-    sTDPSynapse = STDPSynapse(n1Post, n2Pre, sTDPSynapseConfigurator)
+    sTDPSynapse = STDPSynapse(sTDPSynapseConfigurator,n1Post, n2Pre)
     weights = set()
     for x in range(steps):
         n1Post.run()

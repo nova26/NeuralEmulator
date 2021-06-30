@@ -3,7 +3,7 @@ from NeuralEmulator.Configurators.PulseSynapseConfigurator import PulseSynapseCo
 from NeuralEmulator.Preprocessing.PreprocessingBlock import PreprocessingBlock
 from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 from NeuralEmulator.Preprocessing.PosPreprocessingBlock import PosPreprocessingBlock
-from NeuralEmulator.Utils.Utils import getValueFromPoly
+from NeuralEmulator.Utils.Utils import getValueFromPoly, getObjID
 import numpy as np
 
 
@@ -31,16 +31,20 @@ class PulseSynapse(SynapseBase):
 
 
 class PulseSynapseWeighted(SynapseBase):
-    def __init__(self, vinSource, vwSource, configurator):
+    def __init__(self, vinSource, vwSource, configurator, printLog=False):
         self.vinSource = vinSource
         self.vwSource = vwSource
 
         self.configurator = configurator
+        self.printLog = printLog
 
         self.cacheVinVal = self.vinSource.getVoltage()
         self.cacheVwVal = self.vwSource.getVoltage()
         self.current = 0
         self.__updateCurrent()
+
+        if self.printLog is True:
+            print("PulseSynapseWeighted ID {} created with: idVin {}".format(getObjID(self), getObjID(self.vinSource)))
 
     def __updateCurrent(self):
         self.cacheVinVal = self.vinSource.getVoltage()
@@ -54,6 +58,10 @@ class PulseSynapseWeighted(SynapseBase):
     def run(self):
         vin = self.vinSource.getVoltage()
         vw = self.vwSource.getVoltage()
+
+        if self.printLog is True:
+            print("PulseSynapseWeighted {}: idVin {} vin {} vw {}".format(getObjID(self), getObjID(self.vinSource), vin, vw))
+
         if self.cacheVinVal != vin or self.cacheVwVal != vw:
             self.__updateCurrent()
 
@@ -70,4 +78,3 @@ if __name__ == "__main__":
     cfg = PulseSynapseConfigurator()
 
     pulseSyn = PulseSynapse(posPreprocessingBlock, cfg)
-    print("asd {}".format(pulseSyn.getCurrent()))

@@ -29,7 +29,7 @@ simOZfreqs = []
 
 simpleSynapse = SimpleSynapse()
 leakCurrent = SimpleLeakCurrent(0)
-oz = OZNeuron(simpleSynapse, leakCurrent, ozConfigurator)
+oz = OZNeuron(ozConfigurator,simpleSynapse, leakCurrent )
 
 for i in iIn:
     simpleSynapse.setCurrent(i)

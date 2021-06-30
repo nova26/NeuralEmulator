@@ -65,3 +65,10 @@ if __name__ == "__main__":
     start = time.time()
     getValueFromPoly(coef,l, x)
     print("Second Time elapsed:", time.time() - start)
+
+
+def getObjID(obj):
+    idi = id(obj)
+    idif = idi * (10 ** -5)
+    idi = int((idif - int(idif)) * 10 ** 5)
+    return idi

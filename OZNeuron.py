@@ -2,14 +2,15 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from NeuralEmulator.Interfaces.SimBase import SimBase
+from NeuralEmulator.Interfaces.VoltageSourceBase import VoltageSourceBase
 from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
-from NeuralEmulator.Test.SimpleLeakCurrent import SimpleLeakCurrent
+from NeuralEmulator.Test.SimpleLeakCurrent import CurrentSourceBase, SimpleLeakCurrent
 from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
-from NeuralEmulator.Utils.Utils import getValueFromPoly
+from NeuralEmulator.Utils.Utils import getValueFromPoly, getObjID
 
 
-class OZNeuron(SimBase):
-    def __init__(self, synapse, leakCurrent, ozNeuronConfigurator):
+class OZNeuron(VoltageSourceBase):
+    def __init__(self, ozNeuronConfigurator, synapse=None, leakCurrent=None, invertOutput=False, printLog=False):
         self.synapse = synapse
         self.leakCurrent = leakCurrent
         self.configurator = ozNeuronConfigurator
@@ -19,13 +20,24 @@ class OZNeuron(SimBase):
 
         timeTime = len(self.spikeValsList) * ozNeuronConfigurator.getSimTimeTick()
         self.maxSpike = 1.0 / timeTime
-
+        self.printLog = printLog
         self.inCurrent = 0
         self.simIndex = 0
         self.outLeak = 0
         self.vout = 0
+        self.invertOutput = invertOutput
 
         self.__configWindow()
+
+        self.setSynapse(synapse)
+
+    def setLeakSource(self, leakCurrent):
+        self.leakCurrent = leakCurrent
+
+    def setSynapse(self, synapse):
+        self.synapse = synapse
+        if self.synapse is not None:
+            print("OZ {} Synapse {}".format(getObjID(self), getObjID(self.synapse)))
 
     def __configWindow(self):
 
@@ -58,14 +70,16 @@ class OZNeuron(SimBase):
         else:
             self.vout = 0
 
-    def getVoutVal(self):
+    def getVoltage(self):
+        if self.invertOutput is True:
+            self.vout = (self.vout * -1) + 3.3
+
+        if self.printLog is True and self.vout < 3.3 and self.vout > 0:
+            print("Neuron {} vout {}".format(getObjID(self), self.vout))
         return self.vout
 
     def __getWindowSize(self):
         return self.windowSize
-
-    def __getIinCoef(self):
-        return self.coef
 
     def __getIin(self):
         return self.inCurrent
@@ -96,10 +110,21 @@ class OZNeuron(SimBase):
     def getFreq(self):
         return self.freq
 
+    def reset(self):
+        self.simIndex = 0
+        self.inCurrent = 0
+        self.outLeak = 0
+
     def run(self):
+        #  print("OZ {} call {}".format(getObjID(self),getObjID(self.synapse)))
         inc = self.synapse.getCurrent()
+        #   print("OZ {} Iin {} from {}".format(getObjID(self), inc, getObjID(self.synapse)))
+
+        #    print("OZ {} call Leak {}".format(getObjID(self),getObjID(self.synapse)))
         ouc = self.leakCurrent.getCurrent()
-        if (not self.__isInSpike()) and (self.inCurrent != inc or self.outLeak !=ouc):
+        #     print("OZ {} Leak {} from {}\n".format(getObjID(self), ouc, getObjID(self.leakCurrent)))
+
+        if (not self.__isInSpike()) and (self.inCurrent != inc or self.outLeak != ouc):
             self.__updateCurrents()
             self.__configWindow()
 
@@ -115,7 +140,7 @@ if __name__ == "__main__":
     simpleSynapse = SimpleSynapse(1.0 * 10.0 ** (-6))
     leakCurrent = SimpleLeakCurrent(0)
     oZNeuronConfigurator = OZNeuronConfigurator()
-    n = OZNeuron(simpleSynapse, leakCurrent, oZNeuronConfigurator)
+    n = OZNeuron(oZNeuronConfigurator, simpleSynapse, leakCurrent, )
     simTime = oZNeuronConfigurator.getSimTimeTick()
     numberOfTicksPerOneSec = int(1.0 // oZNeuronConfigurator.getSimTimeTick())
     vals = []

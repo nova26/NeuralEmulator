@@ -38,6 +38,10 @@ class PulseSynapseVWConfigurator:
                     self.vwToVinToIout[vw][1].append(self.df_iout[idx])
 
     def getCurrentForVoltage(self, vin, vw):
+        vw = round(vw, 2)
+
+        if vw > 3.3:
+            vw = 3.3
 
         tup = self.vwToVinToIout[vw]
         t = np.searchsorted(tup[0], vin, side='right')
@@ -49,4 +53,3 @@ if __name__ == "__main__":
     os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
     y = PulseSynapseVWConfigurator()
     t = y.getCurrentForVoltage(0.01, 0)
-    print("asd")

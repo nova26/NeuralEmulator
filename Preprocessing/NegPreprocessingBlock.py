@@ -6,6 +6,8 @@ class NegPreprocessingBlock(VoltageSourceBase):
         self.preprocessingBlock = preprocessingBlock
 
     def getVoltage(self):
+       # return self.preprocessingBlock.getVoutNEG()+1
+
         return self.preprocessingBlock.getVoutNEG()
 
     def run(self):

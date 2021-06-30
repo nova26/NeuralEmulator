@@ -10,6 +10,7 @@ from NeuralEmulator.PulseSynapse import PulseSynapse, PulseSynapseWeighted
 from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
 from NeuralEmulator.OZNeuron import OZNeuron
 from NeuralEmulator.Test.SimpleLeakCurrent import SimpleLeakCurrent
+from NeuralEmulator.Utils.Generators import Generator
 from NeuralEmulator.Utils.NeuronsGenerator import NeuronsGenerator
 from NeuralEmulator.Utils.Utils import getFreqForSpikesVec
 from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
@@ -61,23 +62,38 @@ if __name__ == "__main__":
     positivePulseSynapse = PulseSynapseWeighted(vposPort, staticSource, pulseSynapseVWConfigurator)
     negativePulseSynapse = PulseSynapseWeighted(vnegPort, staticSource, pulseSynapseVWConfigurator)
 
-    # Leak
-    normalLeakSource = NormalLeakSource(SimpleVoltageSource(764.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-    normalLeakSource2 = NormalLeakSource(SimpleVoltageSource(755.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-    normalLeakSource3 = NormalLeakSource(SimpleVoltageSource(745.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-    normalLeakSource4 = NormalLeakSource(SimpleVoltageSource(735.0 * (10 ** -3)), noramalLeakSourceConfigurator)
-
-    # Neuron
-    ozNeuron = OZNeuron(positivePulseSynapse, normalLeakSource, ozNeuronConfigurator)
-    ozNeuron2 = OZNeuron(positivePulseSynapse, normalLeakSource2, ozNeuronConfigurator)
-    ozNeuron3 = OZNeuron(positivePulseSynapse, normalLeakSource3, ozNeuronConfigurator)
-    ozNeuron4 = OZNeuron(positivePulseSynapse, normalLeakSource4, ozNeuronConfigurator)
+    # normalLeakSource = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(745.0 * (10 ** -3)))
+    # normalLeakSource2 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(730.0 * (10 ** -3)))
+    # normalLeakSource3 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(715.0 * (10 ** -3)))
+    # normalLeakSource4 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(700.0 * (10 ** -3)))
+    #
+    # normalLeakSource5 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((764.0) * (10 ** -3)))
+    # normalLeakSource6 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((755.0) * (10 ** -3)))
+    # normalLeakSource7 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((745.0) * (10 ** -3)))
+    # normalLeakSource8 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((735.0) * (10 ** -3)))
+    #
+    # # Neuron
+    # ozNeuron = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource)
+    # ozNeuron2 = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource2)
+    # ozNeuron3 = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource3)
+    # ozNeuron4 = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource4)
+    #
+    # ozNeuron5 = OZNeuron(ozNeuronConfigurator, negativePulseSynapse, normalLeakSource5)
+    # ozNeuron6 = OZNeuron(ozNeuronConfigurator, negativePulseSynapse, normalLeakSource6)
+    # ozNeuron7 = OZNeuron(ozNeuronConfigurator, negativePulseSynapse, normalLeakSource7)
+    # ozNeuron8 = OZNeuron(ozNeuronConfigurator, negativePulseSynapse, normalLeakSource8)
+    #
+    NUMBER_OF_NEURONS = 8
+    L55 = Generator().generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 700.0 * (10 ** -3), 15.0 * (10 ** -3))
+    posNeurons = Generator().generateEnsemble(positivePulseSynapse, L55)
+    negNeurons = Generator().generateEnsemble(negativePulseSynapse, L55)
+    L3 = posNeurons+negNeurons
 
     # Layers
     L1 = [vin, preProcessBlock]
     L2 = [negativePulseSynapse, positivePulseSynapse]
 
-    L3 = [ozNeuron, ozNeuron2, ozNeuron3, ozNeuron4]
+    # L3 = [ozNeuron, ozNeuron2, ozNeuron3, ozNeuron4,ozNeuron5,ozNeuron6,ozNeuron7,ozNeuron8]
 
     layers = [L1, L2, L3]
 
@@ -123,7 +139,7 @@ if __name__ == "__main__":
                     obj.run()
 
             for ko in keyToObj.keys():
-                neuronsVout[ko].append(keyToObj[ko].getVoutVal())
+                neuronsVout[ko].append(keyToObj[ko].getVoltage())
 
         for k in neuronsFreqs.keys():
             if k != "VIN":

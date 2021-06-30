@@ -16,7 +16,6 @@ class SimpleSynapse(SynapseBase):
 
 
 if __name__ == "__main__":
-    print("asda")
     b = SimpleSynapse()
     val = b.getCurrent()
     print(val)

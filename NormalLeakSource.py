@@ -1,4 +1,4 @@
-from NeuralEmulator.Interfaces.LeakCurrentBase import LeakCurrentBase
+from NeuralEmulator.Interfaces.CurrentSourceBase import CurrentSourceBase
 from NeuralEmulator.Utils.Utils import getValueFromPoly
 import numpy as np
 
@@ -6,8 +6,8 @@ from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 from NeuralEmulator.Configurators.NormalLeakSourceConfigurator import NormalLeakSourceConfigurator
 
 
-class NormalLeakSource(LeakCurrentBase):
-    def __init__(self, vin, configurator):
+class NormalLeakSource(CurrentSourceBase):
+    def __init__(self, configurator, vin=None):
         self.vin = vin
         self.cacheVoltage = vin.getVoltage()
         self.current = 0
@@ -15,9 +15,11 @@ class NormalLeakSource(LeakCurrentBase):
         self.configurator = configurator
         self.__calcCurrent()
 
-
     def getCurrent(self):
         return self.current
+
+    def setVoltageSource(self, vin):
+        self.vin = vin
 
     def __calcCurrent(self):
         self.current = self.configurator.getCurrentForVoltage(self.cacheVoltage)

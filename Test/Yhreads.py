@@ -1,27 +1,45 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 from time import sleep, time
+from multiprocessing import Pool
+from multiprocessing import Process
+
+from NeuralEmulator.VoltageSources.LinearSignal import StaticSource
 
 
-def foo(t):
-    sleep(t)
+def t1(obj):
+    obj.setVoltage(5)
 
 
-s = time()
-for x in range(8):
-    foo(0.5)
-print("Total {}".format(time() - s))
+if __name__ == '__main__':
+    v1Source = StaticSource(1)
+    executor = ThreadPoolExecutor(max_workers=8)
 
-task = []
-executor = ThreadPoolExecutor(max_workers=8)
+    a = executor.submit(t1,v1Source)
 
-s = time()
-
-for x in range(8):
-    a = executor.submit(foo,0.5)
-    task.append(a)
-
-for t in task:
-    while t.done() is False:
+    while a.done() is False:
         pass
+    print(v1Source.getVoltage())
 
-print("Total {}".format(time() - s))
+# def foo(t):
+#     sleep(t)
+#
+#
+# s = time()
+# for x in range(8):
+#     foo(0.5)
+# print("Total {}".format(time() - s))
+#
+# task = []
+# executor = ThreadPoolExecutor(max_workers=8)
+#
+# s = time()
+#
+# for x in range(8):
+#     a = executor.submit(foo,0.5)
+#     task.append(a)
+#
+# for t in task:
+#     while t.done() is False:
+#         pass
+#
+# print("Total {}".format(time() - s))

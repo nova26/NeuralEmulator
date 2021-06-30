@@ -2,11 +2,11 @@ from NeuralEmulator.Interfaces.VoltageSourceBase import VoltageSourceBase
 
 
 class Adder(VoltageSourceBase):
-    def __init__(self, listOfSources = None):
+    def __init__(self, listOfSources=None):
         self.listOfSources = listOfSources
         self.vout = 0
 
-    def setListOfSources(self,listOfSources):
+    def setListOfSources(self, listOfSources):
         self.listOfSources = listOfSources
 
     def run(self):

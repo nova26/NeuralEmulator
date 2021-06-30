@@ -14,8 +14,9 @@ from NeuralEmulator.Preprocessing.PreprocessingBlock import PreprocessingBlock
 from NeuralEmulator.PulseSynapse import PulseSynapse
 from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 
-
 import matplotlib.pyplot as plt
+
+from NeuralEmulator.Utils.Utils import getObjID
 
 OUTOUT_FOLDER = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\circuits\temporal"
 OUTOUT_FILE = OUTOUT_FOLDER + "\\curves.csv"
@@ -27,7 +28,9 @@ class TemporalIntegration(VoltageSourceBase):
         amp, dt = configurator.getAmpAndDtForVoltage(vConf)
         self.pointsInSec = int(1.0 // configurator.getSimTime())
         self.spikeAmp = amp
+
         self.decayTime = dt
+
         self.ozNeuron = ozNeuron
         self.prevVal = 0
         self.vout = 0
@@ -36,7 +39,16 @@ class TemporalIntegration(VoltageSourceBase):
         self.spikeMask = [0, 0, 0]
         self.spikeMaskIndex = 0
 
+    def reset(self):
+        self.prevVal = 0
+        self.vout = 0
+        self.index = 0
+        self.window = []
+        self.spikeMask = [0, 0, 0]
+        self.spikeMaskIndex = 0
+
     def getVoltage(self):
+        # print("-I- TemporalIntegration {} VOUT {}".format(getObjID(self),self.vout))
         return self.vout
 
     def __appendVin(self, vin):
@@ -52,14 +64,21 @@ class TemporalIntegration(VoltageSourceBase):
 
     def __spikeIn(self):
         self.vout = self.vout + self.spikeAmp
+
         if self.vout > 3.3:
             self.vout = 3.3
 
         N, tau = self.vout, self.decayTime
-        t = np.linspace(0, 1, self.pointsInSec)
+
+        samples = int(tau // self.configurator.getSimTime())
+
+        samples= samples*60
+
+        t = np.linspace(0, 1, samples)
 
         self.index = 0
         self.window = N * np.exp(-t / tau)
+
         self.spikeMask = [0, 0, 0]
         self.spikeMapIndex = 0
 
@@ -74,7 +93,7 @@ class TemporalIntegration(VoltageSourceBase):
             self.index += 1
 
     def run(self):
-        currentVoltage = self.ozNeuron.getVoutVal()
+        currentVoltage = self.ozNeuron.getVoltage()
 
         self.__appendVin(currentVoltage)
 
@@ -104,13 +123,13 @@ if __name__ == "__main__":
     positivePulseSynapse = PulseSynapse(vposPort, pulseSynapseConfigurator)
 
     # Leaks
-    normalLeakSource1 = NormalLeakSource(SimpleVoltageSource(770.0 * (10 ** -3)), noramalLeakSourceConfigurator)
+    normalLeakSource1 = NormalLeakSource(noramalLeakSourceConfigurator, SimpleVoltageSource(770.0 * (10 ** -3)))
 
     # Neurons
-    ozNeuron1 = OZNeuron(positivePulseSynapse, normalLeakSource1, ozNeuronConfigurator)
+    ozNeuron1 = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource1)
 
     # Integration
-    temporalIntegration = TemporalIntegration(450 * (10 ** -3), temporalConfigurator, ozNeuron1)
+    temporalIntegration = TemporalIntegration(800 * (10 ** -3), temporalConfigurator, ozNeuron1)
 
     # Layers
     L1 = [vin, preProcessBlock, vposPort, vnegPort]
@@ -137,7 +156,7 @@ if __name__ == "__main__":
             for obj in l:
                 obj.run()
 
-        ozVout.append(ozNeuron1.getVoutVal())
+        ozVout.append(ozNeuron1.getVoltage())
         temporalVout.append(temporalIntegration.getVoltage())
         timeVec.append(currentTime)
         currentTime += simResTime
@@ -146,5 +165,3 @@ if __name__ == "__main__":
     plt.plot(timeVec, temporalVout)
 
     plt.show()
-
-    print("asd")
