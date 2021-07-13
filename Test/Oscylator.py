@@ -23,6 +23,7 @@ from NeuralEmulator.PulseSynapse import PulseSynapse
 from NeuralEmulator.TemporalIntegration import TemporalIntegration
 from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 from NeuralEmulator.Utils.Generators import Generator
+from NeuralEmulator.Utils.Utils import playSound
 from NeuralEmulator.VoltageSources.LinearSignal import LinearSignal, OscylatorRefSignal, PulseSource
 from NeuralEmulator.VoltageSources.SinSignal import SinSignal, SquaredSin
 
@@ -30,10 +31,10 @@ OUTOUT_FILE = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\Learning\lr.csv"
 
 os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
 
-SIM_TIME = 30.0
+SIM_TIME = 3.0
 NUMBER_OF_NEURONS = 32
-LR = 3 * (10 ** -3)
-osyFactor = 1 / (2 * 2 * 2 * 2 * 2)
+LR = 0.525 * (10 ** -3)
+osyFactor = 1 / (2 *2*2)
 
 generator = Generator()
 
@@ -47,7 +48,7 @@ adderForX1 = Adder()
 adderForX2 = Adder()
 
 # Pulse
-pulseSource = PulseSource(50 * (10 ** -3), 20 * (10 ** -3), 20 * (10 ** -3))
+pulseSource = PulseSource(50 * (10 ** -3), 30 * (10 ** -3), 800 * (10 ** -3))
 clusterVoltageSourceX11 = ClusterVoltageSource([adderForX1, pulseSource])
 
 L1 = [adderForX1, adderForX2, pulseSource, clusterVoltageSourceX11]
@@ -147,6 +148,8 @@ for tick in range(SIMULATION_TICKS):
     x2Probe.append(adderForX2.getVoltage())
 
 print("\nsimulation runtime {}s".format(time.time() - startTime))
+
+playSound()
 
 fig, axs = plt.subplots(4, 2)
 

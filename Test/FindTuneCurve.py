@@ -21,8 +21,8 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 from NeuralEmulator.VoltageSources.LinearSignal import StaticSource
 
-OUTOUT_FOLDER = r'C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\tuneCurves'
-OUTOUT_FILE = OUTOUT_FOLDER + "\\curves.csv"
+OUTOUT_FOLDER = r'C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\results'
+OUTOUT_FILE = OUTOUT_FOLDER + "\\bounded_bounded.csv"
 
 
 def runSimObj(obj):
@@ -63,14 +63,14 @@ if __name__ == "__main__":
     negativePulseSynapse = PulseSynapseWeighted(vnegPort, staticSource, pulseSynapseVWConfigurator)
 
     # normalLeakSource = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(745.0 * (10 ** -3)))
-    # normalLeakSource2 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(730.0 * (10 ** -3)))
-    # normalLeakSource3 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(715.0 * (10 ** -3)))
-    # normalLeakSource4 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(700.0 * (10 ** -3)))
+    # normalLeakSource2 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(700.0 * (10 ** -3)))
+    # normalLeakSource3 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(600.0 * (10 ** -3)))
+    # normalLeakSource4 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource(450.0 * (10 ** -3)))
     #
-    # normalLeakSource5 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((764.0) * (10 ** -3)))
-    # normalLeakSource6 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((755.0) * (10 ** -3)))
-    # normalLeakSource7 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((745.0) * (10 ** -3)))
-    # normalLeakSource8 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((735.0) * (10 ** -3)))
+    # normalLeakSource5 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((745.0) * (10 ** -3)))
+    # normalLeakSource6 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((700.0) * (10 ** -3)))
+    # normalLeakSource7 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((600.0) * (10 ** -3)))
+    # normalLeakSource8 = NormalLeakSource(noramalLeakSourceConfigurator, StaticSource((450.0) * (10 ** -3)))
     #
     # # Neuron
     # ozNeuron = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource)
@@ -82,18 +82,21 @@ if __name__ == "__main__":
     # ozNeuron6 = OZNeuron(ozNeuronConfigurator, negativePulseSynapse, normalLeakSource6)
     # ozNeuron7 = OZNeuron(ozNeuronConfigurator, negativePulseSynapse, normalLeakSource7)
     # ozNeuron8 = OZNeuron(ozNeuronConfigurator, negativePulseSynapse, normalLeakSource8)
-    #
+    #   Bounded L55 = Generator().generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 730.0 * (10 ** -3), 15.0 * (10 ** -3))
+
     NUMBER_OF_NEURONS = 8
-    L55 = Generator().generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 700.0 * (10 ** -3), 15.0 * (10 ** -3))
+    L55 = Generator().generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 500.0 * (10 ** -3), 80.0 * (10 ** -3))
+    L55 = Generator().generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 730.0 * (10 ** -3), 15.0 * (10 ** -3))  # Bounded
+
     posNeurons = Generator().generateEnsemble(positivePulseSynapse, L55)
     negNeurons = Generator().generateEnsemble(negativePulseSynapse, L55)
-    L3 = posNeurons+negNeurons
+    L3 = posNeurons + negNeurons
 
     # Layers
     L1 = [vin, preProcessBlock]
     L2 = [negativePulseSynapse, positivePulseSynapse]
 
-    # L3 = [ozNeuron, ozNeuron2, ozNeuron3, ozNeuron4,ozNeuron5,ozNeuron6,ozNeuron7,ozNeuron8]
+    #  L3 = [ozNeuron, ozNeuron2, ozNeuron3, ozNeuron4,ozNeuron5,ozNeuron6,ozNeuron7,ozNeuron8]
 
     layers = [L1, L2, L3]
 
@@ -121,19 +124,20 @@ if __name__ == "__main__":
 
     start = time.time()
 
+
     while VIN != 1:
         VIN += STEP_SIZE
         if VIN > VIN_MAX:
             VIN = VIN_MAX
 
         print("STEP {}/{} VIN {}".format(currentStep, totalIncrements, VIN))
-        # sys.stdout.write("\rSTEP {}/{} VIN {}".format(currentStep, totalIncrements, VIN))
-        # sys.stdout.flush()
         neuronsFreqs["VIN"].append(VIN)
 
         vin.setVoltage(VIN)
+        steps = []
 
         for t in range(numberOfTicksPerOneSec):
+            steps.append(t)
             for l in layers:
                 for obj in l:
                     obj.run()
@@ -144,12 +148,18 @@ if __name__ == "__main__":
         for k in neuronsFreqs.keys():
             if k != "VIN":
                 f1 = getFreqForSpikesVec(neuronsVout[k])
+                # if k == "n6":
+                #     print("-I- freq {}".format(f1))
+                #     plt.plot(steps, neuronsVout[k])
+                #     plt.show()
+
                 s = neuronsFreqs[k]
                 s.append(f1)
                 neuronsFreqs[k] = s
                 neuronsVout[k] = []
 
         currentStep += 1
+
 
     print("\nTime {:.3f}s".format(time.time() - start))
     df = pd.DataFrame(neuronsFreqs)
