@@ -37,7 +37,7 @@ for i in iIn:
 
     for x in range(numberOfTicksPerOneSec):
         oz.run()
-        vals.append(oz.getVoutVal())
+        vals.append(oz.getVoltage())
 
     freq = getFreqForSpikesVec(vals)
     simOZfreqs.append(freq)

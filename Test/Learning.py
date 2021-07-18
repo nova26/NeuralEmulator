@@ -150,7 +150,7 @@ for tick in range(SIMULATION_TICKS):
             obj.run()
 
     for ko in keyToNeuronObj.keys():
-        neuronsVout[ko].append(keyToNeuronObj[ko].getVoutVal())
+        neuronsVout[ko].append(keyToNeuronObj[ko].getVoltage())
         temporalBlockVout[ko].append(keyToTemporalObj[ko].getVoltage())
         learningBlockVout[ko].append(keyToLRObj[ko].getVoltage())
 

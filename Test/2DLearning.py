@@ -38,7 +38,7 @@ temporalConfigurator = TemporalConfigurator()
 
 # VIN
 vinSin = SinSignal(SIM_TIME, ozNeuronConfigurator.getSimTimeTick(), 2)
-vinLin = LinearSignal(1.0, ozNeuronConfigurator.getSimTimeTick(), 1)
+vinLin = LinearSignal(1.0, ozNeuronConfigurator.getSimTimeTick())
 
 # vref = SquaredSin(SIM_TIME, ozNeuronConfigurator.getSimTimeTick(), 2)
 

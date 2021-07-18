@@ -21,14 +21,16 @@ class PreprocessingBlock(SimBase):
         vin = self.voltgaeSource.getVoltage()
 
         VPOS = -vin
-        VPOS = VPOS + 1
-        VPOS = VPOS * (3.3 / 2.0)
+        VPOS = -(VPOS + 1)
+        VPOS = -(VPOS * 1.65)
         self.VPOS = VPOS
 
         VNEG = vin
-        VNEG = VNEG + 1
-        VNEG = VNEG * (3.3 / 2.0)
+        VNEG = -(VNEG + 1)
+        VNEG = -(VNEG * 1.65)
         self.VNEG = VNEG
+
+
 
 
 class PreprocessingBlockPos(SimBase):

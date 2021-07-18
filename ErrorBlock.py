@@ -6,6 +6,7 @@ class ErrorBlock(VoltageSourceBase):
         self.inputSignal = inputSignal
         self.refSignal = refSignal
         self.error = 0
+        self.prevErr =0
         self.neuronsNumber = neuronsNumber
 
     def setInputSignal(self):
@@ -17,6 +18,10 @@ class ErrorBlock(VoltageSourceBase):
 
         self.error = -(inputSig - refSig)
         self.error = self.error / self.neuronsNumber
+
+        self.error = (self.error - self.prevErr)/128 #Low-pass
+        self.prevErr = self.error
+
 
     def getVoltage(self):
         return self.error

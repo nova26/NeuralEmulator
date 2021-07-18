@@ -16,7 +16,7 @@ from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 
 import matplotlib.pyplot as plt
 
-from NeuralEmulator.Utils.Utils import getObjID
+from NeuralEmulator.Utils.Utils import getObjID, getExpDecayFunc
 
 OUTOUT_FOLDER = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\circuits\temporal"
 OUTOUT_FILE = OUTOUT_FOLDER + "\\curves.csv"
@@ -25,14 +25,12 @@ OUTOUT_FILE = OUTOUT_FOLDER + "\\curves.csv"
 class TemporalIntegration(VoltageSourceBase):
     def __init__(self, vConf, configurator, ozNeuron):
         self.configurator = configurator
+        self.vConf = vConf
         amp, dt = configurator.getAmpAndDtForVoltage(vConf)
-        self.pointsInSec = int(1.0 // configurator.getSimTime())
         self.spikeAmp = amp
-
         self.decayTime = dt
 
         self.ozNeuron = ozNeuron
-        self.prevVal = 0
         self.vout = 0
         self.index = 0
         self.window = []
@@ -40,7 +38,6 @@ class TemporalIntegration(VoltageSourceBase):
         self.spikeMaskIndex = 0
 
     def reset(self):
-        self.prevVal = 0
         self.vout = 0
         self.index = 0
         self.window = []
@@ -62,6 +59,9 @@ class TemporalIntegration(VoltageSourceBase):
         else:
             return False
 
+    def setPSCFilterTime(self, time):
+        self.decayTime = time
+
     def __spikeIn(self):
         self.vout = self.vout + self.spikeAmp
 
@@ -69,16 +69,18 @@ class TemporalIntegration(VoltageSourceBase):
             self.vout = 3.3
 
         N, tau = self.vout, self.decayTime
+        simStepTime = self.configurator.getSimTime()
 
-        samples = int(tau // self.configurator.getSimTime())
+        samples = int(tau // simStepTime)
+        # samples = samples *100
 
-        samples= samples*60
+        maxTime = (5 * tau + 0.5)
 
-        t = np.linspace(0, 1, samples)
+        t = np.linspace(0, maxTime, samples)
 
-        self.index = 0
         self.window = N * np.exp(-t / tau)
 
+        self.index = 0
         self.spikeMask = [0, 0, 0]
         self.spikeMapIndex = 0
 
@@ -123,13 +125,13 @@ if __name__ == "__main__":
     positivePulseSynapse = PulseSynapse(vposPort, pulseSynapseConfigurator)
 
     # Leaks
-    normalLeakSource1 = NormalLeakSource(noramalLeakSourceConfigurator, SimpleVoltageSource(770.0 * (10 ** -3)))
+    normalLeakSource1 = NormalLeakSource(noramalLeakSourceConfigurator, SimpleVoltageSource(750.0 * (10 ** -3)))
 
     # Neurons
     ozNeuron1 = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource1)
 
     # Integration
-    temporalIntegration = TemporalIntegration(800 * (10 ** -3), temporalConfigurator, ozNeuron1)
+    temporalIntegration = TemporalIntegration(150 * (10 ** -3), temporalConfigurator, ozNeuron1)
 
     # Layers
     L1 = [vin, preProcessBlock, vposPort, vnegPort]
@@ -151,7 +153,7 @@ if __name__ == "__main__":
 
     for t in range(numberOfTicksPerOneSec):
 
-        vin.setVoltage(450 * (10 ** -3))
+        vin.setVoltage(190 * (10 ** -3))
         for l in layers:
             for obj in l:
                 obj.run()

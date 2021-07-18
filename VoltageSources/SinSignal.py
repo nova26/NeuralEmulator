@@ -26,10 +26,18 @@ class SinSignal(VoltageSourceBase):
             return self.voutMask[self.index]
 
 
-class SquaredSin(SinSignal):
-    def __init__(self, simulationTime, stepTime,frequency=1):
-        super().__init__(simulationTime, stepTime,frequency)
-        self.voutMask = self.voutMask * self.voutMask
+class SquaredSin(VoltageSourceBase):
+
+    def __init__(self, sinSignalVoltageSource):
+        self.sinSignalVoltageSource = sinSignalVoltageSource
+        self.voltage = 0
+
+    def getVoltage(self):
+        return self.voltage
+
+    def run(self):
+        self.voltage = self.sinSignalVoltageSource.getVoltage() * self.sinSignalVoltageSource.getVoltage()
+
 
 
 if __name__ == "__main__":
