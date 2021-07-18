@@ -25,16 +25,6 @@ class Generator:
 
         return leakSources
 
-    def generateUniformLeaks(self):
-        normalLeakSource = NormalLeakSource(self.noramalLeakSourceConfigurator, StaticSource(745.0 * (10 ** -3)))
-        normalLeakSource2 = NormalLeakSource(self.noramalLeakSourceConfigurator, StaticSource(700.0 * (10 ** -3)))
-        normalLeakSource3 = NormalLeakSource(self.noramalLeakSourceConfigurator, StaticSource(600.0 * (10 ** -3)))
-        normalLeakSource4 = NormalLeakSource(self.noramalLeakSourceConfigurator, StaticSource(450.0 * (10 ** -3)))
-
-        return [normalLeakSource, normalLeakSource2, normalLeakSource3, normalLeakSource4]
-
-    def generateBoundedLeaks(self):
-        return self.generateNormalLeakSources(int(8 / 2), 730.0 * (10 ** -3), 15.0 * (10 ** -3))
     def generateEnsemble(self, inputSrc, leakSources):
         ens = []
         for lk in leakSources:

@@ -16,7 +16,7 @@ from NeuralEmulator.Test.SimpleVoltageSource import SimpleVoltageSource
 
 import matplotlib.pyplot as plt
 
-from NeuralEmulator.Utils.Utils import getObjID, getExpDecayFunc
+from NeuralEmulator.Utils.Utils import getObjID
 
 OUTOUT_FOLDER = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\circuits\temporal"
 OUTOUT_FILE = OUTOUT_FOLDER + "\\curves.csv"
@@ -69,16 +69,16 @@ class TemporalIntegration(VoltageSourceBase):
             self.vout = 3.3
 
         N, tau = self.vout, self.decayTime
-        simStepTime = self.configurator.getSimTime()
 
-        samples = int(tau // simStepTime)
-        samples = samples *100
+        samples = int(tau // self.configurator.getSimTime())
+
+        samples= samples*60
 
         t = np.linspace(0, 1, samples)
 
+        self.index = 0
         self.window = N * np.exp(-t / tau)
 
-        self.index = 0
         self.spikeMask = [0, 0, 0]
         self.spikeMapIndex = 0
 
@@ -123,13 +123,13 @@ if __name__ == "__main__":
     positivePulseSynapse = PulseSynapse(vposPort, pulseSynapseConfigurator)
 
     # Leaks
-    normalLeakSource1 = NormalLeakSource(noramalLeakSourceConfigurator, SimpleVoltageSource(750.0 * (10 ** -3)))
+    normalLeakSource1 = NormalLeakSource(noramalLeakSourceConfigurator, SimpleVoltageSource(770.0 * (10 ** -3)))
 
     # Neurons
     ozNeuron1 = OZNeuron(ozNeuronConfigurator, positivePulseSynapse, normalLeakSource1)
 
     # Integration
-    temporalIntegration = TemporalIntegration(700 * (10 ** -3), temporalConfigurator, ozNeuron1)
+    temporalIntegration = TemporalIntegration(800 * (10 ** -3), temporalConfigurator, ozNeuron1)
 
     # Layers
     L1 = [vin, preProcessBlock, vposPort, vnegPort]
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     for t in range(numberOfTicksPerOneSec):
 
-        vin.setVoltage(750 * (10 ** -3))
+        vin.setVoltage(450 * (10 ** -3))
         for l in layers:
             for obj in l:
                 obj.run()

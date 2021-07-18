@@ -1,19 +1,14 @@
-import os
-
-from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
 from NeuralEmulator.Interfaces.VoltageSourceBase import VoltageSourceBase
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 class LinearSignal(VoltageSourceBase):
-    def __init__(self, simTime, simStep):
-        steps = int(simTime // simStep)
-
-        x = np.linspace(-1, 1, steps)
-
-        self.y = x
-
+    def __init__(self, simTime, simStep, endVale):
+        size = int(simTime // simStep)
+        x = np.linspace(0, size, size)
+        m = endVale / simTime
+        self.y = (m * x) / size
         self.index = 0
         self.vout = 0
 
@@ -95,68 +90,7 @@ class PulseSource(VoltageSourceBase):
         return self.vout
 
 
-class LinearSignalSteps(VoltageSourceBase):
-    def __init__(self, simTime, simStep, holdSteps):
-        self.simStep = simStep
-
-        steps = int(simTime // simStep)
-
-        timePerStep = int(steps // holdSteps)
-        voltDeltaPerStep = 2 / holdSteps
-
-        start = 0
-        end = timePerStep
-
-        voltage = -1
-
-        bounds = []
-        indexToVal = {}
-        for x in range(holdSteps):
-            xValsForStep = np.linspace(start, end, steps)
-            bounds.append(xValsForStep)
-            start = end
-            end += timePerStep
-            indexToVal[x] = voltage
-            voltage += voltDeltaPerStep
-
-        self.bounds = bounds
-        self.indexToVal = indexToVal
-
-        self.counter = 0
-
-    def getVoltage(self):
-        return self.vout
-
-    def run(self):
-
-        for x in range(len(self.bounds)):
-            vals =self.bounds[x]
-            if self.counter < vals[-1]:
-                self.vout = self.indexToVal[x]
-                break
-
-        self.counter = self.counter + 1
-
 if __name__ == "__main__":
-    os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
-
-    SIM_TIME = 1.0
-    simResTime = OZNeuronConfigurator().getSimTimeTick()
-    SIMULATION_TICKS = int(SIM_TIME // simResTime)
-
-    vin = LinearSignalSteps(SIM_TIME, OZNeuronConfigurator().getSimTimeTick(),200)
-
-
-    voutVals = []
-    timeAxis = []
-
-    timeIndex = 0
-    for tick in range(SIMULATION_TICKS):
-        print("\rSTEP {}/{}".format(tick + 1, SIMULATION_TICKS))
-        timeAxis.append(timeIndex)
-        timeIndex += simResTime
-        vin.run()
-        voutVals.append(vin.getVoltage())
-
-    plt.plot(timeAxis, voutVals)
-    plt.show()
+    sinSignal = LinearSignal(1, 4.8809138070110005e-05, 1)
+    t = sinSignal.getVoltage()
+    print("dsf")
