@@ -32,9 +32,9 @@ OUTOUT_FILE = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\Learning\lr.csv"
 os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
 
 SIM_TIME = 3.0
-NUMBER_OF_NEURONS = 32
-LR = 0.525 * (10 ** -3)
-osyFactor = 1 / (2 *2*2)
+NUMBER_OF_NEURONS = 8
+LR = 50 * (10 ** -3)
+osyFactor = 1 / (2)
 
 generator = Generator()
 
@@ -81,16 +81,16 @@ clusteredNEGCurrentSrc = ClusterCurrentSource([negativePulseSynapsex1, negativeP
 L4 = [clusteredPosCurrentSrc, clusteredNEGCurrentSrc]
 
 # Leak
-L5 = generator.generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 700.0 * (10 ** -3), 15.0 * (10 ** -3))
-
+#L5 = generator.generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 700.0 * (10 ** -3), 15.0 * (10 ** -3))
+L5 = generator.generateUniformLeaks()
 # Neurons
 posNeurons = generator.generateEnsemble(clusteredPosCurrentSrc, L5)
 negNeurons = generator.generateEnsemble(clusteredNEGCurrentSrc, L5)
 L6 = posNeurons + negNeurons
 
 # Temporal Integration
-posTemporals = generator.generateTempIntegrations(100 * (10 ** -3), posNeurons)
-negTemporals = generator.generateTempIntegrations(100 * (10 ** -3), negNeurons)
+posTemporals = generator.generateTempIntegrations(40 * (10 ** -3), posNeurons)
+negTemporals = generator.generateTempIntegrations(40 * (10 ** -3), negNeurons)
 L7 = posTemporals + negTemporals
 
 # Oscylator function
@@ -127,12 +127,15 @@ startTime = time.time()
 
 x1LearninBlocksOutput = [[] for x in x1LearningBlocks]
 
+neuronsOutput = [[] for x in L6]
+neuronsTemporalOutput = [[] for x in L7]
+
 pulseProbe = []
 x11Probe = []
 x2Probe = []
 
 for tick in range(SIMULATION_TICKS):
-    print("\rSTEP {}/{}".format(tick+1, SIMULATION_TICKS))
+    print("\rSTEP {}/{}".format(tick + 1, SIMULATION_TICKS))
     timeAxis.append(timeAxisVal)
     timeAxisVal += simResTime
 
@@ -142,6 +145,11 @@ for tick in range(SIMULATION_TICKS):
 
     # for n in range(len(x1LearningBlocks)):
     #     x1LearninBlocksOutput[n].append(x1LearningBlocks[n].getVoltage())
+    for n in range(len(L6)):
+        neuronsOutput[n].append(L6[n].getVoltage())
+
+    for n in range(len(L7)):
+        neuronsTemporalOutput[n].append(L7[n].getVoltage())
 
     pulseProbe.append(pulseSource.getVoltage())
     x11Probe.append(adderForX1.getVoltage())
@@ -149,20 +157,27 @@ for tick in range(SIMULATION_TICKS):
 
 print("\nsimulation runtime {}s".format(time.time() - startTime))
 
-playSound()
+# playSound()
 
-fig, axs = plt.subplots(4, 2)
+# fig, axs = plt.subplots(8, 3)
+#
+# axs[0, 0].plot(timeAxis, pulseProbe)
+# axs[1, 0].plot(timeAxis, x11Probe)
+# axs[2, 0].plot(timeAxis, x2Probe)
+# axs[3, 0].plot(x11Probe, x2Probe)
+#
+# for n in range(len(L6)):
+#     axs[n, 1].plot(timeAxis, neuronsOutput[n])
+#
+# for n in range(len(L7)):
+#     axs[n, 2].plot(timeAxis, neuronsTemporalOutput[n])
+#
+# df = pd.DataFrame({'time': timeAxis,
+#                    'X1': x11Probe,
+#                    'X2': x2Probe})
+#
+# fPath = r'C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\Oscylator\oscylator.csv'
+# df.to_csv(fPath, index=False)
 
-axs[0, 0].plot(timeAxis, pulseProbe)
-axs[1, 0].plot(timeAxis, x11Probe)
-axs[2, 0].plot(timeAxis, x2Probe)
-axs[3, 0].plot(x11Probe, x2Probe)
-
-df = pd.DataFrame({'time': timeAxis,
-                   'X1': x11Probe,
-                   'X2': x2Probe})
-
-fPath = r'C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\Oscylator\oscylator.csv'
-df.to_csv(fPath, index=False)
-
+plt.plot(x11Probe, x2Probe)
 plt.show()

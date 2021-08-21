@@ -30,7 +30,7 @@ from NeuralEmulator.VoltageSources.SinSignal import SinSignal, SquaredSin
 os.environ["NERUSIM_CONF"] = r"C:\Users\Avi\Desktop\IntelliSpikesLab\Emulator\config"
 
 BoundedLeaks = True
-SinInput = True
+SinInput = False
 
 vals = [[False, False], [False, True], [True, False], [True, True]]
 

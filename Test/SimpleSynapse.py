@@ -1,7 +1,7 @@
-from NeuralEmulator.Interfaces.SynapseBase import SynapseBase
+from NeuralEmulator.Interfaces.CurrentSourceBase import CurrentSourceBase
 
 
-class SimpleSynapse(SynapseBase):
+class SimpleSynapse(CurrentSourceBase):
     def __init__(self, currentVal=0):
         self.current = currentVal
 

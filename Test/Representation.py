@@ -45,7 +45,7 @@ temporalConfigurator = TemporalConfigurator()
 
 
 vinSin = SinSignal(SIM_TIME, ozNeuronConfigurator.getSimTimeTick(), 2)
-vinSin = LinearSignal(SIM_TIME,ozNeuronConfigurator.getSimTimeTick(),-1,1)
+vinSin = LinearSignal(SIM_TIME,ozNeuronConfigurator.getSimTimeTick())
 
 
 l1 = [vinSin]
@@ -59,7 +59,7 @@ negativePulseSynapsex1 = PulseSynapse(vnegPortSin, pulseSynapseConfigurator)
 l2 = [preProcessBlockSin, vposPortSin, vnegPortSin, positivePulseSynapsex1, negativePulseSynapsex1]
 
 #l3 = Generator().generateNormalLeakSources(int(NUMBER_OF_NEURONS / 2), 700.0 * (10 ** -3), 15.0 * (10 ** -3))
-l3 = Generator().generateBounded()
+l3 = Generator().generateUniformLeaks()
 
 posNeurons = generator.generateEnsemble(positivePulseSynapsex1, l3)
 negNeurons = generator.generateEnsemble(negativePulseSynapsex1, l3)
@@ -113,14 +113,14 @@ for tick in range(SIMULATION_TICKS):
         temporals[n].append(l5[n].getVoltage())
         lrBlocks[n].append(x1LearningBlocks[n].getVoltage())
 
-fig, axs = plt.subplots(8, 4)
+fig, axs = plt.subplots(8, 2)
 for n in range(len(neurons)):
     axs[n, 0].plot(timeAxis, neurons[n])
-    axs[n, 1].plot(timeAxis, temporals[n])
-    axs[n, 2].plot(timeAxis, lrBlocks[n])
+    # axs[n, 1].plot(timeAxis, temporals[n])
+    # axs[n, 2].plot(timeAxis, lrBlocks[n])
 
-axs[0, 3].plot(timeAxis, vinProb)
-axs[1, 3].plot(timeAxis, adderProbe)
+axs[0, 1].plot(timeAxis, vinProb)
+# axs[1, 3].plot(timeAxis, adderProbe)
 
 # fig, axs = plt.subplots(2, 2)
 # axs[0, 0].plot(timeAxis, vinProb)
