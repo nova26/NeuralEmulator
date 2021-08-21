@@ -72,9 +72,9 @@ class TemporalIntegration(VoltageSourceBase):
         simStepTime = self.configurator.getSimTime()
 
         samples = int(tau // simStepTime)
-        # samples = samples *100
+        samples = samples *10
 
-        maxTime = (5 * tau + 0.5)
+        maxTime = 5 * tau
 
         t = np.linspace(0, maxTime, samples)
 

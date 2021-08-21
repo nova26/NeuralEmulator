@@ -1,3 +1,4 @@
+from NeuralEmulator.Interfaces.CurrentSourceBase import CurrentSourceBase
 from NeuralEmulator.Interfaces.SynapseBase import SynapseBase
 from NeuralEmulator.Configurators.PulseSynapseConfigurator import PulseSynapseConfigurator
 from NeuralEmulator.Preprocessing.PreprocessingBlock import PreprocessingBlock
@@ -7,7 +8,7 @@ from NeuralEmulator.Utils.Utils import getValueFromPoly, getObjID
 import numpy as np
 
 
-class PulseSynapse(SynapseBase):
+class PulseSynapse(CurrentSourceBase):
     def __init__(self, vin, configurator):
         self.vin = vin
         self.configurator = configurator
@@ -30,7 +31,7 @@ class PulseSynapse(SynapseBase):
             self.__updateCurrent()
 
 
-class PulseSynapseWeighted(SynapseBase):
+class PulseSynapseWeighted(CurrentSourceBase):
     def __init__(self, vinSource, vwSource, configurator, printLog=False):
         self.vinSource = vinSource
         self.vwSource = vwSource

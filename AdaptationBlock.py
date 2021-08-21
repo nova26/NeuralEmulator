@@ -137,7 +137,7 @@ if __name__ == "__main__":
             for obj in l:
                 obj.run()
 
-        ozVout.append(ozNeuron1.getVoutVal())
+        ozVout.append(ozNeuron1.getVoltage())
         temporalVout.append(temporalIntegration.getVoltage())
         timeVec.append(currentTime)
         currentTime += simResTime

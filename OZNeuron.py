@@ -1,20 +1,14 @@
-import numpy as np
 import os
 import matplotlib.pyplot as plt
 
 from NeuralEmulator.Configurators.NormalLeakSourceConfigurator import NormalLeakSourceConfigurator
 from NeuralEmulator.Configurators.PulseSynapseConfigurator import PulseSynapseConfigurator
-from NeuralEmulator.Interfaces.SimBase import SimBase
 from NeuralEmulator.Interfaces.VoltageSourceBase import VoltageSourceBase
 from NeuralEmulator.NormalLeakSource import NormalLeakSource
 from NeuralEmulator.Preprocessing.NegPreprocessingBlock import NegPreprocessingBlock
-from NeuralEmulator.Preprocessing.PosPreprocessingBlock import PosPreprocessingBlock
 from NeuralEmulator.Preprocessing.PreprocessingBlock import PreprocessingBlock
 from NeuralEmulator.PulseSynapse import PulseSynapse
-from NeuralEmulator.Test.SimpleSynapse import SimpleSynapse
-from NeuralEmulator.Test.SimpleLeakCurrent import CurrentSourceBase, SimpleLeakCurrent
 from NeuralEmulator.Configurators.OZNeuronConfigurator import OZNeuronConfigurator
-from NeuralEmulator.Utils.Utils import getValueFromPoly, getObjID
 from NeuralEmulator.VoltageSources.LinearSignal import LinearSignal, StaticSource, LinearSignalSteps
 
 
