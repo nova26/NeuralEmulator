@@ -1,6 +1,7 @@
 # NeuralEmulator
-OZ neural emulator
+**OZ neural emulator**
 The OZ neural emulator is a scalable Python framework for building, testing, and deploying Spiking Neural Networks architecture and learning algorithms that are using our OZ, PES, and STDP analog circuits designs as the main building blocks. 
+
 The OZ neural emulator can give us a clue if our methods are in the right direction, without the need for expensive hardware deployments and with less time wasted in the hardware circuits design in a CAD tool and the simulation time (SPICE).
  Moreover, as the number of neurons increases the SPICE simulation runtime is not reasonable, so we aim to balance emulation accuracy against scalability.
 Each of the building blocks that were mentioned earlier was divided into a sub-building block, where each sub-building have a corresponding model that was created using its SPICE simulation with varying input signals.
